@@ -1,0 +1,118 @@
+# ===========================================================================
+# scientific-llm - Step 8c: Kubernetes Deployment for the API image built
+# in Step 8b, run locally on minikube.
+# ===========================================================================
+# Design choices worth knowing about (mirrors the reasoning already in
+# Dockerfile / setup_step8b.ps1's comments):
+#
+# - No `nvidia.com/gpu` resource request here, and no GPU is expected
+#   to be visible inside this pod at all. minikube's own documentation
+#   is explicit that NVIDIA GPU passthrough with the docker driver
+#   requires a Linux host - it does not work on a Windows host, which
+#   is what this project runs on (confirmed against minikube's official
+#   NVIDIA tutorial while building this step, rather than assumed).
+#   That means `src/model/base_model.py`'s 4-bit load (bitsandbytes,
+#   CUDA-only) cannot succeed here, `/health` will correctly report
+#   status "degraded" - not a bug, the same graceful-degradation path
+#   Step 8a/8b already rely on - and this is expected, not a failure of
+#   this step. GPU-backed inference was already fully proven end to end
+#   in Step 8b's Docker container; what THIS step verifies is the
+#   Kubernetes deployment mechanics themselves (rollout, Service
+#   routing, probes) on top of that same image, on your one local
+#   single-GPU dev machine. See setup_step8c.ps1 and the README for how
+#   scripts/verify_step8b.py's --allow-degraded flag accounts for this.
+# - Only the Hugging Face cache is mounted (via a hostPath that
+#   setup_step8c.ps1 populates with `minikube start --mount`). The
+#   trained adapter checkpoint is deliberately NOT mounted here to keep
+#   this step's moving parts down to one mount instead of two - if it
+#   is missing, `src/api/main.py` already serves the base model instead
+#   of failing (the same degraded-but-running behavior Step 8a and 8b
+#   both rely on). See the README for how to add a second mount if you
+#   want the trained adapter served from minikube too.
+# - `imagePullPolicy: Never` - this image is built directly into
+#   minikube's own internal Docker daemon by setup_step8c.ps1 (via
+#   `minikube docker-env`), not pushed to any registry. `Never` makes
+#   that explicit: if the image is not already present on the node,
+#   this fails fast and clearly instead of hanging on a network pull
+#   that was never going to succeed.
+# - Both probes are plain `httpGet` checks against `/health` - unlike
+#   the Dockerfile's own HEALTHCHECK (which greps for `"status":"ok"`,
+#   i.e. "the model is fully loaded"), these only require a 200
+#   response, i.e. "the process is up and can serve traffic". That is
+#   the correct Kubernetes readiness/liveness semantic (can this pod
+#   accept requests right now), and it is deliberately decoupled from
+#   whether the ML model itself loaded - given the GPU limitation noted
+#   above, gating readiness on a full model load would mean this
+#   Deployment could never become Ready on this machine, which is not
+#   what this step is meant to prove. `main.py`'s /health always
+#   returns 200 (status "ok" or "degraded" in the body) by design, for
+#   exactly this reason - see its own module docstring.
+# ===========================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scientific-llm-api
+  labels:
+    app: scientific-llm-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scientific-llm-api
+  template:
+    metadata:
+      labels:
+        app: scientific-llm-api
+    spec:
+      containers:
+        - name: scientific-llm-api
+          image: scientific-llm-api:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8000
+          env:
+            - name: HF_HOME
+              value: /root/.cache/huggingface
+            - name: ADAPTER_DIR
+              value: /app/outputs/checkpoints/step4_verify
+          volumeMounts:
+            - name: hf-cache
+              mountPath: /root/.cache/huggingface
+          resources:
+            # Sized for a 6GB minikube node (see setup_step8c.ps1's
+            # --memory value and its own comment on why) rather than a
+            # rounder, larger number - this pod only runs FastAPI and
+            # uvicorn without a real model load in the no-GPU case (see
+            # the design note near the top of this file), so it needs
+            # nowhere near the full node anyway.
+            requests:
+              cpu: "1"
+              memory: "512Mi"
+            limits:
+              cpu: "4"
+              memory: "3Gi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 12
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+      volumes:
+        - name: hf-cache
+          hostPath:
+            # Populated by `minikube start --mount --mount-string=...`
+            # in setup_step8c.ps1 - see that file for the Windows path
+            # it maps to this.
+            path: /mnt/hf-cache
+            type: Directory

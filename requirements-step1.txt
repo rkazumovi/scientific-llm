@@ -1,0 +1,23 @@
+# ---------------------------------------------------------------------------
+# scientific-llm — Step 1 requirements
+# Core stack needed to load, 4-bit quantize, and LoRA-adapt a base LLM.
+# torch/torchvision/torchaudio are installed SEPARATELY in setup_step1.ps1
+# with the CUDA-specific index-url — do not add them here, pip would pull
+# the CPU-only build from plain PyPI and silently break GPU support.
+#
+# Everything else (FastAPI, Docker, LangChain/LangGraph, FAISS, Gradio,
+# Prometheus, ROUGE, etc.) is intentionally deferred to later steps — Step 1
+# is "can I load a quantized model and attach a LoRA adapter", nothing more.
+# ---------------------------------------------------------------------------
+
+transformers>=4.45
+peft>=0.13
+trl>=0.11
+accelerate>=1.0
+bitsandbytes>=0.44
+datasets>=3.0
+huggingface_hub>=0.25
+sentencepiece>=0.2
+protobuf>=4.25
+scipy>=1.14
+sympy>=1.13

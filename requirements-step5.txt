@@ -1,0 +1,11 @@
+# ---------------------------------------------------------------------------
+# scientific-llm - Step 5 additions on top of requirements-step1/2/4.txt
+#
+# There are none. Perplexity reuses torch/transformers (Step 1). ROUGE is
+# implemented from scratch (see src/evaluation/rouge_eval.py's docstring
+# for why - it is simple enough not to need the `rouge-score` package).
+# The math verifier reuses sympy (Step 1). The MATH/SciQ/ARC-Challenge
+# benchmark harness reuses the `datasets` library (Step 1). This file
+# exists only so setup_step5.ps1 can follow the same "pip install -r
+# requirements-stepN.txt" pattern as every other step.
+# ---------------------------------------------------------------------------

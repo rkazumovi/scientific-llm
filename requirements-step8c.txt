@@ -1,0 +1,7 @@
+# scientific-llm - Step 8c: no new Python dependencies.
+#
+# This step is Kubernetes/minikube tooling (minikube, kubectl), not
+# Python packages - nothing here changes what runs inside the
+# container image itself (still requirements-docker.txt), and
+# scripts/verify_step8b.py (reused for this step's verification, see
+# its --allow-degraded flag) only needed the standard library already.

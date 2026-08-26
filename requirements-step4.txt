@@ -1,0 +1,10 @@
+# ---------------------------------------------------------------------------
+# scientific-llm - Step 4 additions on top of requirements-step1/2.txt
+#
+# There are none. Step 4 (physics-consistency loss, the training loop,
+# LoRA merging) only uses torch, transformers, peft, and the Python
+# standard library - all already installed in Step 1/2. This file exists
+# just so setup_step4.ps1 can follow the same "pip install -r
+# requirements-stepN.txt" pattern as every other step, even though the
+# install here is a no-op.
+# ---------------------------------------------------------------------------

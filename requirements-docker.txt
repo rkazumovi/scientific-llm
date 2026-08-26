@@ -1,0 +1,54 @@
+# ---------------------------------------------------------------------------
+# scientific-llm - Docker image requirements (Step 8b).
+#
+# Deliberately NOT the same as requirements-step1.txt + every later
+# file concatenated together. This is the minimal set src/api/main.py's
+# actual import chain needs to serve /health and /generate:
+#   torch, transformers, bitsandbytes  - Step 2's 4-bit model load
+#   accelerate                         - transformers needs it for
+#                                         device_map="auto" / 4-bit loading
+#   peft                                - main.py loads a trained adapter
+#                                         via PeftModel.from_pretrained
+#   sentencepiece, protobuf            - Mistral's tokenizer
+#   fastapi, uvicorn                   - the serving layer itself
+#   prometheus_client                  - Step 8d's GET /metrics - main.py
+#                                         imports this unconditionally at
+#                                         module level (app = create_
+#                                         production_app() runs at import
+#                                         time), so leaving it out here
+#                                         would crash the whole image at
+#                                         startup, not just disable
+#                                         metrics - the same class of
+#                                         mistake this project already
+#                                         found and fixed once for torch
+#                                         in create_production_app()'s
+#                                         own gpu_available guard.
+#
+# NOT included: sympy, datasets, faiss-cpu, sentence-transformers,
+# langgraph, jupyter/ipykernel - none of those are on the import path of
+# the two endpoints this image actually serves right now (the API does
+# not expose the RAG/agent endpoints yet). Baking in unused packages
+# would just make the image bigger and slower to build for no benefit -
+# add them here if a later step adds a route that needs them.
+#
+# torch is installed via --extra-index-url (matching setup_step1.ps1's
+# CUDA 12.4 wheel install exactly) rather than plain PyPI, for the same
+# reason that script warns about: plain PyPI would silently give a
+# CPU-only build.
+# ---------------------------------------------------------------------------
+
+--extra-index-url https://download.pytorch.org/whl/cu124
+torch
+torchvision
+torchaudio
+
+transformers>=4.45
+peft>=0.13
+accelerate>=1.0
+bitsandbytes>=0.44
+sentencepiece>=0.2
+protobuf>=4.25
+
+fastapi>=0.100
+uvicorn>=0.30
+prometheus_client>=0.20

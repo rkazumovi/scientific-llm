@@ -1,0 +1,11 @@
+# ---------------------------------------------------------------------------
+# scientific-llm - Step 7 additions on top of requirements-step1/2/4/5/6.txt
+#
+# langgraph - the agent framework (src/agent/graph.py). Pulls in
+# langchain-core and a few small langgraph-* support packages
+# automatically - none of them touch torch, so this should not affect
+# your existing CUDA torch build at all (unlike Step 6, there is nothing
+# here to double check on that front).
+# ---------------------------------------------------------------------------
+
+langgraph>=0.2

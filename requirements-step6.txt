@@ -1,0 +1,24 @@
+# ---------------------------------------------------------------------------
+# scientific-llm - Step 6 additions on top of requirements-step1/2/4/5.txt
+#
+# The first step since Step 1 that needs genuinely new packages:
+#
+# faiss-cpu           - vector similarity search (src/rag/vector_store.py).
+#                        CPU build deliberately: the index itself is small
+#                        (a few thousand short vectors at most) and does not
+#                        need GPU acceleration, so this leaves the full 8GB
+#                        of VRAM free for Mistral-7B.
+# sentence-transformers - the small embedding model used to turn paper text
+#                        into vectors (src/rag/embeddings.py). This pulls in
+#                        its own torch dependency, but you already have the
+#                        CUDA build of torch installed from Step 1 - pip
+#                        will see that requirement is already satisfied and
+#                        will NOT try to reinstall a different torch build.
+#                        If you ever see pip about to touch torch while
+#                        installing this, stop and paste the output back
+#                        before continuing - that would be a sign something
+#                        unexpected is happening, not routine.
+# ---------------------------------------------------------------------------
+
+faiss-cpu>=1.8
+sentence-transformers>=3.0

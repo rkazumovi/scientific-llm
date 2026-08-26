@@ -1,0 +1,22 @@
+﻿# Virtual environment
+venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# Training/data artifacts - large and regenerable (see README for how to rebuild)
+outputs/
+data/
+
+# Secrets / local env
+.env
+*.env
+
+# Logs
+*.log
+
+# OS junk
+Thumbs.db

@@ -1,0 +1,17 @@
+# ---------------------------------------------------------------------------
+# scientific-llm - Step 8a additions on top of requirements-step1/2/4/5/6/7.txt
+#
+# fastapi  - the serving framework (src/api/main.py, src/api/schemas.py).
+# uvicorn  - the ASGI server that actually runs the FastAPI app - the
+#            [standard] extra pulls in a faster event loop (uvloop) and
+#            websocket support; neither is required for this project, so
+#            the plain package is enough here.
+#
+# scripts/verify_step8a.py deliberately tests over real HTTP (a
+# subprocess + urllib, both already covered / standard library) rather
+# than FastAPI's in-process TestClient, so no test-only HTTP client
+# package (httpx) is needed here either. Neither of these touches torch.
+# ---------------------------------------------------------------------------
+
+fastapi>=0.100
+uvicorn>=0.30

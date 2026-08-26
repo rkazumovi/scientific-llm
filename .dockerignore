@@ -1,0 +1,27 @@
+# scientific-llm - Docker build context exclusions (Step 8b).
+#
+# Keeps the build context (and therefore build time and image size)
+# small, and keeps things that should be MOUNTED AT RUNTIME - the model
+# cache, trained checkpoints - out of the image entirely. A checkpoint
+# baked into the image would mean rebuilding the whole image every time
+# you retrain; mounting it instead (see setup_step8b.ps1 / README) lets
+# the image stay checkpoint-agnostic.
+
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Model cache and trained checkpoints - mounted as volumes at `docker
+# run` time instead of baked into the image (see README Step 8b).
+outputs/
+data/
+
+# Not needed at serving time - only Steps 1-7's own local development
+# used these.
+notebooks/
+.git/
+.gitignore
+*.md
+Dockerfile
+.dockerignore

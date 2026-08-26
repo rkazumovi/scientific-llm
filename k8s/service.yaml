@@ -1,0 +1,26 @@
+# ===========================================================================
+# scientific-llm - Step 8c: Service in front of the scientific-llm-api
+# Deployment.
+# ===========================================================================
+# ClusterIP, not NodePort - setup_step8c.ps1 reaches this with
+# `kubectl port-forward`, which works against a ClusterIP service and is
+# far more predictable across minikube driver types on Windows than
+# `minikube service` (which needs its own tunnel process for the docker
+# driver on Windows and would add another background process to manage,
+# on top of everything else this step already juggles).
+# ===========================================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: scientific-llm-api
+  labels:
+    app: scientific-llm-api
+spec:
+  type: ClusterIP
+  selector:
+    app: scientific-llm-api
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP

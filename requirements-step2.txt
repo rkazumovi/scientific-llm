@@ -1,0 +1,10 @@
+# ---------------------------------------------------------------------------
+# scientific-llm - Step 2 additions on top of requirements-step1.txt
+# Everything needed for Step 2 (load + quantize + LoRA) besides these was
+# already installed in Step 1 (transformers, peft, bitsandbytes, etc).
+# This just adds notebook support so notebooks/lora_math.ipynb runs in
+# VS Code using the project venv as its kernel.
+# ---------------------------------------------------------------------------
+
+ipykernel>=6.29
+jupyter>=1.0
